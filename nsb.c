@@ -71,6 +71,38 @@ void *truckfunc(void *arg) // Entry point for truck threads
     pthread_exit(NULL);
 }
 
+void initCars(Vehicle *cars) // Initialise cars
+{
+    for (int i = 0; i < E_CARS + W_CARS; i++)
+    {
+        cars[i].id = i;
+        if (i >= E_CARS) // If cars above the E_CARS index
+        {
+            cars[i].dir = 'W';
+            cars[i].counter = &w_counter;
+            cars[i].semaphore = w_sem;
+        }
+        else
+        {
+            cars[i].dir = 'E';
+            cars[i].counter = &e_counter;
+            cars[i].semaphore = e_sem;
+        }
+    }
+}
+
+void initTrucks(Vehicle *trucks) // Initialise trucks
+{
+    for (int i = 0; i < E_TRUCKS + W_TRUCKS; i++)
+    {
+        trucks[i].id = i;
+        if (i >= E_TRUCKS)
+            trucks[i].dir = 'W';
+        else
+            trucks[i].dir = 'E';
+    }
+}
+
 void cleanup(void) // Remove semaphores after completion
 {
     rm_sem(e_sem);
@@ -98,31 +130,9 @@ int main(void)
     V(w_sem);
     V(bridge_sem);
 
-    // Loop for each vehicle, initialise properties
-    for (i = 0; i < E_CARS + W_CARS; i++)
-    {
-        cars[i].id = i;
-        if (i >= E_CARS) // If cars above the E_CARS index
-        {
-            cars[i].dir = 'W';
-            cars[i].counter = &w_counter;
-            cars[i].semaphore = w_sem;
-        }
-        else
-        {
-            cars[i].dir = 'E';
-            cars[i].counter = &e_counter;
-            cars[i].semaphore = e_sem;
-        }
-    }
-    for (i = 0; i < E_TRUCKS + W_TRUCKS; i++)
-    {
-        trucks[i].id = i;
-        if (i >= E_TRUCKS)
-            trucks[i].dir = 'W';
-        else
-            trucks[i].dir = 'E';
-    }
+    // Initialise vehicles
+    initCars(cars);
+    initTrucks(trucks);
 
     // Create pthreads for each vehicle
     for (i = 0; i < E_CARS + W_CARS; i++)
